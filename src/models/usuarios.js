@@ -25,6 +25,10 @@ const usuarioSchema = new Schema({
     type: [String],
     default:[]    
   },
+  permisos:{
+    type: String,
+    default: "USER"
+  }
   
 });
 
