@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Publicaciones</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="/forms/inicio" class="brand-logo">Inicio</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a id="cerrar">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </nav>
+    
+    <div class="container">
+      <h2>Detalles de Publicación</h2>
+      <form
+      class="row"
+      id="form"
+      action="/forms/imagen"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      <div class="input-field col s6">
+        <input id="titulo" type="text" class="validate" />
+        <label for="titulo" class="active">Titulo</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="video" type="text" class="validate" />
+        <label for="video" class="active">Video (link de Youtube)</label>
+      </div>
+
+      <div class="input-field col s3">
+        <input id="imagen" type="text" class="validate" />
+        <label for="imagen" class="active">Imagen</label>
+      </div>
+      <div class="file-field input-field col s3">
+        <div class="btn">
+          <span>Imagen (Opc)</span>
+          <input name="imagen-publicacion" type="file" />
+        </div>
+        <div class="file-path-wrapper">
+          <input
+            class="file-path validate"
+            type="text"
+            placeholder="Sube una Imagen"
+          />
+        </div>
+      </div>
+      <div class="input-field col s6">
+        <select multiple id="categorias"></select>
+        <label>Categorias</label>
+      </div>
+      <div class="input-field col s6">
+        <input id="fecha" type="text" class="datepicker" />
+        <label for="fecha" class="active">Fecha Creación</label>
+      </div>
+      <div class="input-field col s6">
+        <input id="autor" type="text" class="validate" />
+        <label for="autor" class="active">ID de Autor</label>
+      </div>
+      <div class="col s6">
+        <button class="btn center" id="guardar">Guardar</button>
+      </div>
+      <div class="col s6">
+        <a class="btn center" id="cancelar">Cancelar</a>
+      </div>
+      
+      <div class="input-field col s6">
+        <textarea id="contenido" class="materialize-textarea"></textarea>
+        <label for="contenido" class="active">Contenido</label>
+      </div>
+      <div class="input-field col s6">
+        <textarea id="referencias" class="materialize-textarea"></textarea>
+        <label for="referencias" class="active"
+          >Referencias (Separadas por comas ",")</label
+        >
+      </div>      
+    </form>
+    <h4>Detalles de Autor</h4>
+    <div class="row">
+      <table id="tabla_autor" class="col s12">
+        <thead>
+          <tr>
+            <th>Nombres y Apellidos</th>
+            <th>Correo</th>
+            <th>Usuario</th>
+          </tr>
+          <tbody id="lista_resultados_autor">
+  
+          </tbody>
+        </thead>
+      </table>
+    </div>
+    <h4>Detalles de Reportes</h4>
+    <div class="row">
+      <table id="tabla_reportes" class="col s12">
+        <thead>
+          <tr>
+            <th>Autor</th>
+            <th>Motivos</th>
+            <th>Descripción</th>
+            <th>Tipo</th>
+          </tr>
+          <tbody id="lista_resultados_reportes">
+            
+          </tbody>
+        </thead>
+      </table>
+    </div>
+
+    </div>
+    
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+      const form = document.getElementById("form");
+      const titulo = document.getElementById("titulo");
+      const video = document.getElementById("video");
+      const imagen = document.getElementById("imagen");
+      const autor = document.getElementById("autor");
+      const fecha = document.getElementById("fecha");
+      const categorias = document.getElementById("categorias");
+      const contenido = document.getElementById("contenido");
+      const referencias = document.getElementById("referencias");
+      const cancelar = document.getElementById("cancelar");
+      let id;
+
+      cancelar.onclick = () => {
+        location.href = "/forms/entradas";
+      };
+
+      function configuracionFechas() {
+        return {
+          i18n: {
+            months: [
+              "Enero",
+              "Febrero",
+              "Marzo",
+              "Abril",
+              "Mayo",
+              "Junio",
+              "Julio",
+              "Agosto",
+              "Septiembre",
+              "Octubre",
+              "Noviembre",
+              "Diciembre",
+            ],
+            monthsShort: [
+              "Ene",
+              "Feb",
+              "Mar",
+              "Abr",
+              "May",
+              "Jun",
+              "Jul",
+              "Ago",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dic",
+            ],
+            weekdays: [
+              "Domingo",
+              "Lunes",
+              "Martes",
+              "Miércoles",
+              "Jueves",
+              "Viernes",
+              "Sábado",
+            ],
+            weekdaysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+            weekdaysAbbrev: ["D", "L", "M", "W", "J", "V", "S"],
+            today: "Hoy",
+            clear: "Limpiar",
+            close: "Ok",
+          },
+          yearRange: 100,
+          format: "dd - mmmm, yyyy",
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const elems = document.querySelectorAll("select");
+        M.FormSelect.init(elems, {});
+        M.textareaAutoResize(contenido);
+        M.updateTextFields();
+
+        const elemsDate = document.querySelectorAll(".datepicker");
+        const configFecha = configuracionFechas();
+        M.Datepicker.init(elemsDate, configFecha);
+      });
+
+      window.addEventListener("load", async () => {
+        const elems = document.querySelectorAll("select");
+        M.FormSelect.init(elems, {});
+        M.textareaAutoResize(contenido);
+        M.updateTextFields();
+
+        const elemsDate = document.querySelectorAll(".datepicker");
+        const configFecha = configuracionFechas();
+        M.Datepicker.init(elemsDate, configFecha);
+      });
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        if (!localStorage.getItem("id")) {
+          alert("Sesión Cerrada")
+          location.href = "/forms/login";
+        }
+
+        const resImg = await fetch("/api/imagenes/entradas/", {
+          method: "POST",
+          body: new FormData(form),
+        });
+        const img = await resImg.json();
+
+        const categoria = M.FormSelect.getInstance(categorias);
+        const instanceFecha = M.Datepicker.getInstance(fecha);
+
+        const data = {
+          titulo: titulo.value != "" ? titulo.value : null,
+        };
+
+        if (contenido.value != "") {
+          data.contenido = {};
+          data.contenido.descripcion = formatContenido(contenido.value);
+        }
+        if (autor.value != "") data.autor = autor.value;
+        if (fecha.value != "")
+          data.fechaCreacion = new Date(instanceFecha.date);
+        if (img.data) {
+          data.contenido.imagen = "/img/entradas/" + img.data.filename;
+        } else if (imagen.value != "") {
+          data.contenido.imagen = imagen.value;
+        }
+        if (referencias.value != "")
+          data.referencias = formatArrays(referencias.value);
+        if (categorias.value != "")
+          data.categorias = categoria.getSelectedValues();
+        if (video.value != "" && data.contenido)
+          data.contenido.video = video.value;
+        
+        const resEntrada = await fetch("/api/entradas/entrada/"+id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        const entrada = await resEntrada.json();
+        M.toast({ html: entrada.message, displayLength:500,completeCallback: ()=>{location.href="/forms/entradas"} });
+      };
+
+      function formatArrays(input) {
+        return input.split(",").map((cadena) => {
+          return cadena.trimLeft().trimRight();
+        });
+      }
+
+      function formatContenido(input) {
+        return input.replaceAll("\n", "<br>");
+      }
+
+      (async function inicio() {
+        const catsRef = await fetch("/api/categorias");
+        const cats = await catsRef.json();
+
+        cats.forEach((cat) => {
+          const option = document.createElement("option");
+          option.id = cat._id;
+          option.value = cat._id;
+          option.innerText = cat.nombre;
+          categorias.appendChild(option);
+        });
+
+        const path = window.location.pathname;
+        id = path.substring(path.lastIndexOf("/") + 1);
+
+        const resEntrada = await fetch("/api/entradas/entrada/" + id);
+        const entrada = await resEntrada.json();
+
+        if (entrada._id) {
+          titulo.value = entrada.titulo;
+          if (entrada.contenido.video) {
+            video.value = entrada.contenido.video;
+          }
+          if (entrada.contenido.imagen) {
+            imagen.value = entrada.contenido.imagen;
+          }
+          if (entrada.autor) {
+            autor.value = entrada.autor;
+          }
+          contenido.value = formatContenidoEdit(entrada.contenido.descripcion);
+          categorias.childNodes.forEach((el) => {
+            el.selected = entrada.categorias.includes(el.id);
+          });
+          if(entrada.referencias) referencias.value = entrada.referencias.toString();
+          
+          const configFechaInicio = configuracionFechas();
+          configFechaInicio.defaultDate = new Date(entrada.fechaCreacion);
+          configFechaInicio.setDefaultDate = true;
+          M.Datepicker.init(fecha, configFechaInicio);
+        } else {
+          alert("Parámetros no Válidos");
+          window.location = "/forms/entradas";
+        }
+
+        const resAutorPub = await fetch("/api/usuarios/usuario/"+entrada.autor);
+        const autorPub = await resAutorPub.json();
+        
+        const nombresCol = document.createElement("td");
+        const correoCol = document.createElement("td");
+        const usuarioCol = document.createElement("td");
+
+        const tablaAutor = document.getElementById("lista_resultados_autor");
+        tablaAutor.appendChild(nombresCol);
+        tablaAutor.appendChild(correoCol);
+        tablaAutor.appendChild(usuarioCol);
+
+        nombresCol.innerText = autorPub.nombres + " " + autorPub.apellidos;
+        correoCol.innerText = autorPub.correo;
+        usuarioCol.innerText = autorPub.usuario;
+
+
+
+        const resReportes = await fetch("/api/reportes/entrada/"+entrada._id);
+        const reportes = await resReportes.json();
+
+        const tablaReportes = document.getElementById("lista_resultados_reportes");
+
+        reportes.forEach(async (reporte)=>{
+          const fila = document.createElement("tr");
+          tablaReportes.appendChild(fila);
+          
+          const autorCol = document.createElement("td");
+          const motivosCol = document.createElement("td");
+          const descripcionCol = document.createElement("td");
+          const tipoCol = document.createElement("td");
+
+          fila.appendChild(autorCol);
+          fila.appendChild(motivosCol);
+          fila.appendChild(descripcionCol);
+          fila.appendChild(tipoCol);
+
+          const resAutorRep = await fetch("/api/usuarios/usuario/"+reporte.autor);
+          const autorRep= await resAutorRep.json();
+
+          autorCol.innerText = autorRep.usuario;
+          motivosCol.innerText  = reporte.motivos.toString();
+          descripcionCol.innerText  = reporte.descripcion;
+          tipoCol.innerText = reporte.tipo;
+        })
+        
+
+
+        const elems = document.querySelectorAll("select");
+        M.FormSelect.init(elems, {});
+        M.textareaAutoResize(contenido);
+        M.textareaAutoResize(referencias);
+        M.updateTextFields();
+      })();
+
+      function formatContenidoEdit(input) {
+        return input.replaceAll("<br>", "\n");
+      }
+    
+      const cerrar = document.getElementById("cerrar");
+        cerrar.onclick=()=>{
+          if(localStorage.getItem("id")){
+            localStorage.removeItem("id")
+            location.href = "/forms/login";
+          }
+        }
+    </script>
+  </body>
+</html>

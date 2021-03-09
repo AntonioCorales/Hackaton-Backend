@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busqueda de Publicaciones</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+
+<body>
+  <nav>
+    <div class="nav-wrapper">
+      <a href="/forms/inicio" class="brand-logo">Inicio</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a id="cerrar">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="main row">
+    <form id="form">
+      <div class="input-field col s6">
+          <input id="busqueda" type="text" class="validate" />
+          <label for="busqueda" class="active">Búsqueda</label>
+      </div>         
+    </form>
+    <div class="col s12">
+      <a href="/forms/entrada/create" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Agregar</a> 
+    </div>       
+  </div>
+
+  <div class="resultados row">
+      <table id="tabla_resultados" class="col s12">
+        <thead>
+          <tr>
+            <th>Titulo</th>
+            <th>Categorías</th>
+            <th>N° Reportes</th>
+            <th>Opciones</th>
+          </tr>
+          <tbody id="lista_resultados">
+
+          </tbody>
+        </thead>
+      </table>
+    </div>
+  </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+        const form = document.getElementById("form");
+        const lista = document.getElementById("lista_resultados");
+        const busqueda = document.getElementById("busqueda");
+        let categoriasNombres;
+
+        window.addEventListener("load", async ()=>{
+          if(!localStorage.getItem("id")){
+          alert("Sesión Cerrada");
+          location.href = "/forms/login";
+        }
+          M.updateTextFields(); 
+        })
+
+        document.addEventListener("DOMContentLoaded", () => {
+          if(!localStorage.getItem("id")){
+          alert("Sesión Cerrada");
+          location.href = "/forms/login";
+        }
+          M.updateTextFields();
+        })
+
+        form.onsubmit = async (evt)=>{          
+          evt.preventDefault();
+          if(busqueda.value!=""){
+            await buscar("/api/entradas/search/"+busqueda.value);   
+          }else{
+            await buscar("/api/entradas");
+          }                 
+        }
+
+        const buscar = async (URL)=>{
+          lista.innerHTML="";
+
+
+          const resultadosRes = await fetch(URL);
+          const resultados = await resultadosRes.json();   
+          
+          console.log(resultados);
+         
+          resultados.forEach(async (resultado)=>{
+
+            const fila = document.createElement("tr");
+            lista.appendChild(fila);
+
+            const tituloCol = document.createElement("td");
+            const categoriasCol = document.createElement("td");
+            const reportesCol = document.createElement("td");
+            const opcionesCol = document.createElement("td");
+
+            fila.appendChild(tituloCol);
+            fila.appendChild(categoriasCol);            
+            fila.appendChild(reportesCol);
+            fila.appendChild(opcionesCol);
+
+            tituloCol.innerText = resultado.titulo;
+            categoriasCol.innerText = await formatCat(resultado.categorias);
+
+            const repRes = await fetch("/api/reportes/entrada/"+resultado._id);
+            const rep = await repRes.json();
+            reportesCol.innerText = rep.length;
+
+            const btnEdit = document.createElement("a");
+            opcionesCol.appendChild(btnEdit);
+            btnEdit.classList.add("btn");
+            btnEdit.title = "Editar";
+            btnEdit.href = "/forms/entrada/edit/"+resultado._id;
+            btnEdit.innerHTML = `<i class="material-icons">edit</i>`;
+            
+            const btnDelete = document.createElement("a");
+            opcionesCol.appendChild(btnDelete);
+            btnDelete.classList.add("btn");
+            btnDelete.title = "Eliminar";
+            btnDelete.innerHTML = `<i class="material-icons">delete</i>`;
+            btnDelete.onclick = async () => {
+              const res = confirm(
+                "¿Desea eliminar la Publicación?",
+                resultado.titulo
+              );
+              if (res) {
+                const nRes = await fetch(
+                  "/api/entradas/entrada/" + resultado._id,
+                  {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  }
+                );
+                const nRes2 = await nRes.json();
+                
+                M.toast({ html: nRes2.message });
+                buscar(URL);
+              } else {
+                M.toast({ html: "Operación cancelada" });
+              }
+            };
+            });
+          
+        }        
+
+        async function formatCat(arrayCategorias){
+          const a = [];
+          for(const categoria of arrayCategorias){
+            categoriasNombres.forEach((catN)=>{
+              if(catN._id==categoria) a.push(catN.nombre);              
+            })           
+          }      
+          return a;                   
+        }
+    
+        (async function inicio(){          
+          categoriasNombres = await fetch("/api/categorias/").then((cat)=>cat.json()); 
+          await buscar("/api/entradas");
+        })()
+
+        const cerrar = document.getElementById("cerrar");
+        cerrar.onclick=()=>{
+          if(localStorage.getItem("id")){
+            localStorage.removeItem("id")
+            location.href = "/forms/login";
+          }
+        }
+
+    </script>
+</body>
+</html>

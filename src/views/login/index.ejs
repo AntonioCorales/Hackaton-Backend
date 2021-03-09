@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="div-general">
+      <div class="div-interno">
+        <div class="row">
+          <h4 class="center">Iniciar Sesión</h4>
+          <form id="login" class="login cols12">
+            <div class="input-field col s12">
+              <input id="usuario" type="text" class="validate" />
+              <label for="usuario">Usuario</label>
+            </div>
+            <div class="input-field col s12">
+              <input id="password" type="password" class="validate" />
+              <label for="password">Contraseña</label>
+            </div>
+            <button class="waves-effect waves-light btn col s12">Ingresar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+
+      const form = document.getElementById("login");
+      const usuario = document.getElementById("usuario");
+      const pass = document.getElementById("password");
+
+      form.onsubmit = async (evt) =>{
+        evt.preventDefault();
+        const resUsuario = await fetch("/api/usuarios/usuario/"+usuario.value+"/pass/"+pass.value);
+        const usuarioR = await resUsuario.json();
+
+        if(usuarioR){
+          location.href="/forms/inicio";
+          localStorage.setItem("id",usuarioR._id);
+        }else{
+          M.toast({html:"Datos no Válidos"})
+        }
+      }
+
+      (function inicio(){
+        // if(localStorage.getItem("id")){
+        //   location.href="/forms/inicio";
+        // }        
+      })()
+
+
+    </script>
+    <style>
+      .div-general{
+        display: flex;
+        min-width: 100%;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .div-interno{
+        width: 30%;        
+      }
+    </style>
+  </body>
+</html>

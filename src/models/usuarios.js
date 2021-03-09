@@ -12,24 +12,29 @@ const usuarioSchema = new Schema({
   correo: {
     type: String,
     require: true,
+    unique: true
   },
   usuario: {
     type: String,
     require: true,
+    unique: true
   },
   pass: {
     type: String,
     require: true,
   },
+  imagen: {
+    type: String,
+    default: "",
+  },
   categoriasFav: {
     type: [String],
-    default:[]    
+    default: [],
   },
-  permisos:{
+  permisos: {
     type: String,
-    default: "USER"
-  }
-  
+    default: "USER",
+  },
 });
 
 module.exports = model("Usuario", usuarioSchema);

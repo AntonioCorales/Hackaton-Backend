@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicio</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo">Inicio</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a id="cerrar">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="div-general">
+      <div class="div-interno">
+        <div class="row">
+          <h4 class="center">Selecciona Categoría</h4>
+          <a
+            href="/forms/entradas/"
+            class="waves-effect waves-light btn col s12"
+            >Publicaciones</a
+          >
+          <a
+            href="/forms/usuarios/"
+            class="waves-effect waves-light btn col s12"
+            >Usuarios</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      window.addEventListener("load", async () => {
+        if (!localStorage.getItem("id")) {
+          location.href = "/forms/login";
+          alert("Sesión Cerrada");
+        }
+      });
+
+      (function () {
+        if (!localStorage.getItem("id")) {
+          location.href = "/forms/login";
+        }
+      })();
+
+      const cerrar = document.getElementById("cerrar");
+      cerrar.onclick = () => {
+        if (localStorage.getItem("id")) {
+          localStorage.removeItem("id");
+          location.href = "/forms/login";
+        }
+      };
+    </script>
+    <style>
+      .div-general {
+        display: flex;
+        min-width: 100%;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .div-interno {
+        width: 30%;
+      }
+    </style>
+  </body>
+</html>

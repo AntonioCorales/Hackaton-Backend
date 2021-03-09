@@ -9,6 +9,15 @@ const getUsuarios = async (req, res) => {
   }
 };
 
+const getUsuarioById = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.params.id);
+    res.status(200).json(usuario);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 const getUsuario = async (req, res) => {
   try {
     const usuario = await Usuario.findOne({
@@ -50,4 +59,4 @@ const deleteUsuario = async (req,res)=>{
 }
 
 
-module.exports = {getUsuario,editUsuario,createUsuario,deleteUsuario,getUsuarios};
+module.exports = {getUsuario,getUsuarioById,editUsuario,createUsuario,deleteUsuario,getUsuarios};

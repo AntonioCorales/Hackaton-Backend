@@ -6,16 +6,20 @@ const {
   editEntrada,
   getEntrada,
   getEntradas,
+  getEntradasByPag,
   getEntradasBySearch,
   deleteEntrada,
-  getEntradasbyUsuario,
+  getEntradasByUsuario,
+  getEntradasbyUsuarioFav
 } = require("../controllers/entradas-controller");
 
 router.get('/entrada/:id',getEntrada);
-router.get('/:query',getEntradasBySearch);
+router.get('/search/:query',getEntradasBySearch);
 router.get('/',getEntradas);
-router.get('/usuario/:idusuario',getEntradasbyUsuario);
-router.post('/',createEntrada);
+router.get('/:pag',getEntradasByPag);
+router.get('/usuario/:idusuario',getEntradasByUsuario);
+router.get('/usuario-fav/:idusuario/',getEntradasbyUsuarioFav);
+router.post('/entrada/',createEntrada);
 router.put('/entrada/:id',editEntrada);
 router.delete('/entrada/:id',deleteEntrada);
 
